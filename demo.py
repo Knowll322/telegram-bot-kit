@@ -1,4 +1,4 @@
-# Bot Zen — demo offline, jalankan tanpa token Telegram asli, tanpa network.
+# Alexsander LL Bot — demo offline, jalankan tanpa token Telegram asli, tanpa network.
 
 Rekam layar terminal saat menjalankan script ini untuk video portofolio:
 
@@ -109,8 +109,8 @@ def demo_broadcast() -> None:
 
 
 def main() -> None:
-    print("BOT ZEN — Telegram Bot Kit Demo")
-    print("Simulasi penuh tanpa koneksi Telegram. | t.me/botzen")
+    print("ALEXSANDER LL BOT — Telegram Bot Kit Demo")
+    print("Simulasi penuh tanpa koneksi Telegram. | t.me/alexsanderllbot")
     demo_faq()
     demo_reminder()
     demo_broadcast()
