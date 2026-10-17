@@ -1,4 +1,4 @@
-# Alexsander LL Bot — demo offline, jalankan tanpa token Telegram asli, tanpa network.
+"""Alexsander LL Bot — demo offline, jalankan tanpa token Telegram asli, tanpa network.
 
 Rekam layar terminal saat menjalankan script ini untuk video portofolio:
 
