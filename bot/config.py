@@ -23,6 +23,7 @@ class BotConfig:
     broadcast_enabled: bool
     reminder_enabled: bool
     sheets_enabled: bool
+    ai_enabled: bool
     faq_rules: tuple[FaqRule, ...]
     broadcast_delay_seconds: float
     reminder_max_hours: int
@@ -32,6 +33,10 @@ class BotConfig:
     sheets_id: str = ""
     sheets_range: str = "Sheet1!A:B"
     default_broadcast_chat_id: str = ""
+    # Override teks command per klien: {key: teks} (keys: order, portfolio, contact, fallback)
+    texts: dict[str, str] = field(default_factory=dict)
+    # Baris harga: tuple (nama_layanan, harga, detail); kosong = pakai default
+    pricing: tuple[tuple[str, str, str], ...] = ()
 
     @property
     def faq_rules_by_keyword(self) -> dict[str, str]:
@@ -70,6 +75,8 @@ def load_config(config_path: str | Path = "config.yaml") -> BotConfig:
     broadcast_cfg = data.get("broadcast", {}) or {}
     reminder_cfg = data.get("reminder", {}) or {}
     logging_cfg = data.get("logging", {}) or {}
+    texts_raw = data.get("texts", {}) or {}
+    pricing_raw = data.get("pricing", []) or []
 
     token = os.getenv("BOT_TOKEN", "").strip()
     if not token:
@@ -83,6 +90,7 @@ def load_config(config_path: str | Path = "config.yaml") -> BotConfig:
         broadcast_enabled=bool(features.get("broadcast", False)),
         reminder_enabled=bool(features.get("reminder", False)),
         sheets_enabled=bool(features.get("sheets", False)),
+        ai_enabled=bool(features.get("ai", False)),
         faq_rules=_parse_faq_rules(auto_reply_cfg.get("rules", []) or []),
         broadcast_delay_seconds=float(broadcast_cfg.get("delay_seconds", 1.0)),
         reminder_max_hours=int(reminder_cfg.get("max_hours_ahead", 168)),
@@ -92,4 +100,10 @@ def load_config(config_path: str | Path = "config.yaml") -> BotConfig:
         sheets_id=os.getenv("GOOGLE_SHEET_ID", ""),
         sheets_range=os.getenv("GOOGLE_SHEET_RANGE", "Sheet1!A:B"),
         default_broadcast_chat_id=os.getenv("DEFAULT_BROADCAST_CHAT_ID", ""),
+        texts={str(k): str(v) for k, v in texts_raw.items() if v},
+        pricing=tuple(
+            (str(p.get("name", "")), str(p.get("price", "")), str(p.get("detail", "")))
+            for p in pricing_raw
+            if isinstance(p, dict) and p.get("name")
+        ),
     )

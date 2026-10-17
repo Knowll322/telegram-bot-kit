@@ -18,8 +18,16 @@ from telegram.ext import (
 
 from bot.broadcast import broadcast, parse_chat_ids
 from bot.config import BotConfig, load_config
-from bot.faq import match_faq
+from bot.faq import match_best
 from bot.logging_setup import setup_logging
+from bot.pricing import (
+    DEFAULT_CONTACT,
+    DEFAULT_FALLBACK,
+    DEFAULT_ORDER,
+    DEFAULT_PORTFOLIO,
+    format_price,
+    resolve,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,18 +48,43 @@ def _parse_remind(text: str) -> tuple[int, str] | None:
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "Halo! Bot aktif.\n"
-        "Perintah: /help — bantuan\n"
-        "/remind <waktu> <pesan> — contoh: /remind 10m cek laporan"
+        "Halo! Saya Alexsander LL Bot — asisten jasa bot & automation.\n"
+        "\nSilakan pilih:\n"
+        "/price — daftar harga layanan\n"
+        "/order — cara pesan\n"
+        "/portofolio — contoh kode kerja\n"
+        "/kontak — info layanan\n"
+        "/remind 10m cek laporan — pengingat\n"
+        "\nAtau langsung tanya apa saja, mis. \"berapa harga bot absensi?\""
     )
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "/remind 5m cek email — ingatkan setelah 5 menit\n"
-        "/remind 2h rapat — ingatkan setelah 2 jam\n"
-        "Hubungi admin untuk fitur tambahan."
+        "/price — daftar harga\n"
+        "/order — alur pemesanan\n"
+        "/portofolio — repo GitHub & landing page\n"
+        "/kontak — jam layanan & cara hubungi\n"
+        "/remind <waktu> <pesan> — contoh: /remind 30m cek email\n"
+        "/broadcast <id,pesan> — khusus admin\n"
+        "\nTulis pertanyaan bebas juga bisa — saya usahakan jawab."
     )
+
+
+async def cmd_price(update: Update, context: ContextTypes.DEFAULT_TYPE, cfg: BotConfig) -> None:
+    await update.message.reply_text(format_price(cfg))
+
+
+async def cmd_order(update: Update, context: ContextTypes.DEFAULT_TYPE, cfg: BotConfig) -> None:
+    await update.message.reply_text(resolve(cfg, "order", DEFAULT_ORDER))
+
+
+async def cmd_portfolio(update: Update, context: ContextTypes.DEFAULT_TYPE, cfg: BotConfig) -> None:
+    await update.message.reply_text(resolve(cfg, "portfolio", DEFAULT_PORTFOLIO))
+
+
+async def cmd_contact(update: Update, context: ContextTypes.DEFAULT_TYPE, cfg: BotConfig) -> None:
+    await update.message.reply_text(resolve(cfg, "contact", DEFAULT_CONTACT))
 
 
 async def cmd_remind(update: Update, context: ContextTypes.DEFAULT_TYPE, cfg: BotConfig) -> None:
@@ -129,11 +162,28 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE, cfg:
 
 
 async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE, cfg: BotConfig) -> None:
-    if not cfg.auto_reply_enabled or update.message is None:
+    """Jawab setiap pesan teks: FAQ skoring -> AI (opsional) -> fallback."""
+    if update.message is None or not update.message.text:
         return
-    reply = match_faq(update.message.text or "", cfg.faq_rules_by_keyword)
-    if reply:
-        await update.message.reply_text(reply)
+    text = update.message.text
+
+    if cfg.auto_reply_enabled:
+        reply = match_best(text, cfg.faq_rules)
+        if reply:
+            await update.message.reply_text(reply)
+            return
+
+    if cfg.ai_enabled:
+        from bot.ai import ai_answer  # import lokal: butuh GEMINI_API_KEY
+
+        reply = await context.application.run_sync(ai_answer, text)
+        if reply:
+            await update.message.reply_text(reply)
+            return
+
+    # Auto-reply mati? tetap diam. Tapi kalau fitur aktif tapi tak match -> fallback
+    if cfg.auto_reply_enabled:
+        await update.message.reply_text(resolve(cfg, "fallback", DEFAULT_FALLBACK))
 
 
 def build_application(cfg: BotConfig) -> Application:
@@ -143,6 +193,10 @@ def build_application(cfg: BotConfig) -> Application:
     app.add_handler(CommandHandler("help", cmd_help))
 
     # partial (bukan lambda) supaya PTB mengenali callback sebagai coroutine function
+    app.add_handler(CommandHandler("price", partial(cmd_price, cfg=cfg)))
+    app.add_handler(CommandHandler("order", partial(cmd_order, cfg=cfg)))
+    app.add_handler(CommandHandler("portofolio", partial(cmd_portfolio, cfg=cfg)))
+    app.add_handler(CommandHandler("kontak", partial(cmd_contact, cfg=cfg)))
     if cfg.reminder_enabled:
         app.add_handler(CommandHandler("remind", partial(cmd_remind, cfg=cfg)))
     if cfg.broadcast_enabled:

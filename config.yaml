@@ -5,26 +5,47 @@ features:
   broadcast: true         # perintah /broadcast
   reminder: true          # perintah /remind
   sheets: false           # simpan data ke Google Sheets (butuh credential)
+  ai: false               # jawaban AI (Gemini) untuk pertanyaan di luar FAQ — butuh GEMINI_API_KEY
 
 auto_reply:
-  # Keyword -> jawaban. Case-insensitive, match jika keyword ada di pesan.
+  # Rule diurutkan prioritas atas; skor = jumlah keyword yang match dalam 1 pesan.
   rules:
-    - keyword: ["harga", "price", "biaya"]
-      reply: "Harga mulai Rp350.000. Chat admin untuk konsultasi gratis ya!"
-    - keyword: ["jam", "jam kerja", "open"]
-      reply: "Kami online setiap hari 09.00–21.00 WIB."
-    - keyword: ["halo", "hai", "hello", "hi"]
-      reply: "Halo! Ada yang bisa dibantu?"
+    - keyword: ["harga", "biaya", "tarif", "price", "berapa", "ronggo"]
+      reply: "Harga mulai:\n• Bot Telegram custom — Rp350.000\n• Monitor stok/harga — Rp500.000\n• Scraper data — Rp400.000\n\nDetail paket: ketik /price"
+    - keyword: ["bot", "telegram", "wa", "whatsapp", "discord", "absensi", "customer service", "cs", "auto reply", "broadcast", "reminder"]
+      reply: "Bisa! Saya terima pembuatan bot custom: auto-reply/CS, absensi, reminder, broadcast, integrasi API & Google Sheets. Ceritakan kebutuhannya, saya kasih estimasi gratis."
+    - keyword: ["monitor", "pantau", "stok", "harga barang", "flash sale", "tiket", "restock", "harga turun"]
+      reply: "Bot monitor memantau situs target 24/7 dan langsung kirim notifikasi ke Telegram Anda saat stok masuk / harga turun. Mulai Rp500.000. Mau saya cek feasibility situs targetnya?"
+    - keyword: ["scrape", "scraper", "scraping", "crawl", "data", "excel", "csv", "database"]
+      reply: "Saya bisa ambil data website bersih ke Excel/CSV/database (termasuk situs modern ber-JS). Mulai Rp400.000. Kirim URL target + contoh data yang diinginkan."
+    - keyword: ["lama", "waktu", "durasi", "berapa hari", "kapan jadi", "deadline", "cepat"]
+      reply: "Rata-rata 2–7 hari kerja tergantung kompleksitas: bot basic 3 hari, proyek multi-integrasi 5–14 hari."
+    - keyword: ["cara", "pesan", "order", "dp", "bayar", "pembayaran", "transfer", "dp berapa", "metode"]
+      reply: "Alurnya: cerita kebutuhan → estimasi gratis → deal → DP 50% → pengerjaan → pelunasan → serah terima. Detail: /order"
+    - keyword: ["revisi", "error", "bug", "rusak", "perbaiki"]
+      reply: "Revisi gratis sesuai paket (1–3x). Untuk proyek yang sudah jadi, chat detail masalahnya — saya cek dulu."
+    - keyword: ["portofolio", "contoh", "bukti", "pernah", "pengalaman", "testimoni", "review", "repo", "github"]
+      reply: "Repo open-source saya (dengan unit test): github.com/Knowll322 — detail: /portofolio"
+    - keyword: ["jam", "online", "buka", "kerja", "respons", "balas", "fast response"]
+      reply: "Jam layanan 09.00–21.00 WIB setiap hari. Chat kapan saja, dibalas di jam layanan (rata-rata < 2 jam)."
+    - keyword: ["halo", "hai", "hi", "p", "pagi", "siang", "sore", "malam", "assalamualaikum"]
+      reply: "Halo! Ada yang bisa dibantu? Ketik /price untuk lihat harga, atau langsung tanya aja."
+    - keyword: ["terima kasih", "makasih", "thanks", "mantap", "ok", "siap"]
+      reply: "Sama-sama! Kalau ada yang mau ditanyakan lagi, chat aja."
+
+# Teks command bisa dioverride di sini (kosongkan = pakai default di kode)
+# texts:
+#   order: |
+#     ...
+#   fallback: |
+#     ...
 
 broadcast:
-  # Jeda antar pesan (detik) untuk hindari flood limit Telegram
   delay_seconds: 1.0
-  # Max pesan per detik global, aman di bawah limit Telegram (~30/detik)
   max_per_second: 1
 
 reminder:
-  # Format: /remind 10m cek laporan  (s/m/h didukung)
-  max_hours_ahead: 168   # jangan terima reminder lebih dari 7 hari
+  max_hours_ahead: 168
 
 logging:
   file: logs/bot.log
