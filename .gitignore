@@ -1,0 +1,14 @@
+# Rahasia — jangan commit
+.env
+
+# Runtime
+logs/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Credential Google
+service_account.json
+credentials.json
+*.pem

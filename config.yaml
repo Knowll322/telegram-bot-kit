@@ -1,0 +1,31 @@
+# Konfigurasi bot. Sesuaikan per order klien.
+
+features:
+  auto_reply: true        # balas otomatis keyword -> jawaban (faq)
+  broadcast: true         # perintah /broadcast
+  reminder: true          # perintah /remind
+  sheets: false           # simpan data ke Google Sheets (butuh credential)
+
+auto_reply:
+  # Keyword -> jawaban. Case-insensitive, match jika keyword ada di pesan.
+  rules:
+    - keyword: ["harga", "price", "biaya"]
+      reply: "Harga mulai Rp350.000. Chat admin untuk konsultasi gratis ya!"
+    - keyword: ["jam", "jam kerja", "open"]
+      reply: "Kami online setiap hari 09.00–21.00 WIB."
+    - keyword: ["halo", "hai", "hello", "hi"]
+      reply: "Halo! Ada yang bisa dibantu?"
+
+broadcast:
+  # Jeda antar pesan (detik) untuk hindari flood limit Telegram
+  delay_seconds: 1.0
+  # Max pesan per detik global, aman di bawah limit Telegram (~30/detik)
+  max_per_second: 1
+
+reminder:
+  # Format: /remind 10m cek laporan  (s/m/h didukung)
+  max_hours_ahead: 168   # jangan terima reminder lebih dari 7 hari
+
+logging:
+  file: logs/bot.log
+  level: INFO
