@@ -1,4 +1,4 @@
-"""Demo offline — jalankan tanpa token Telegram asli, tanpa network.
+# Bot Zen — demo offline, jalankan tanpa token Telegram asli, tanpa network.
 
 Rekam layar terminal saat menjalankan script ini untuk video portofolio:
 
@@ -109,8 +109,8 @@ def demo_broadcast() -> None:
 
 
 def main() -> None:
-    print("TELEGRAM BOT KIT — Demo Mode")
-    print("Simulasi penuh tanpa koneksi Telegram.")
+    print("BOT ZEN — Telegram Bot Kit Demo")
+    print("Simulasi penuh tanpa koneksi Telegram. | t.me/botzen")
     demo_faq()
     demo_reminder()
     demo_broadcast()
